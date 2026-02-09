@@ -1,0 +1,138 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certirag"
+version = "0.1.0"
+description = "CertiRAG: Fail-Closed Grounding for RAG with Verified Rendering and Claim Certificates"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Aayush Kumar", email = "aayushakumar@users.noreply.github.com"}
+]
+maintainers = [
+    {name = "Aayush Kumar", email = "aayushakumar@users.noreply.github.com"}
+]
+keywords = [
+    "RAG", "grounding", "verification", "NLI", "fact-checking", "LLM",
+    "claim-verification", "evidence-retrieval", "audit-certificate",
+    "trustworthy-ai", "hallucination-detection",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+# ── Core dependencies (always needed) ──────────────────────────────
+dependencies = [
+    "pydantic>=2.5,<3",
+    "pydantic-settings>=2.1",
+    "jsonschema>=4.20",
+    "pyyaml>=6.0",
+    "rich>=13.0",             # pretty logging & console output
+    "click>=8.1",             # CLI
+    "tqdm>=4.66",
+]
+
+[project.urls]
+Homepage = "https://github.com/aayushakumar/CertiRAG"
+Documentation = "https://github.com/aayushakumar/CertiRAG#readme"
+Repository = "https://github.com/aayushakumar/CertiRAG"
+"Bug Tracker" = "https://github.com/aayushakumar/CertiRAG/issues"
+Changelog = "https://github.com/aayushakumar/CertiRAG/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+# ── Lite mode: runs on Codespaces / CPU-only ───────────────────────
+lite = [
+    "spacy>=3.7,<4",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.24,<2",
+    "scikit-learn>=1.3",
+    "openai>=1.12",           # for claim compiler (API-based)
+    "tiktoken>=0.5",
+    "httpx>=0.25",
+    "streamlit>=1.30",
+    "plotly>=5.18",
+]
+
+# ── Full mode: runs on GPU (Colab Pro / local GPU) ────────────────
+full = [
+    "spacy>=3.7,<4",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.24,<2",
+    "scikit-learn>=1.3",
+    "openai>=1.12",
+    "tiktoken>=0.5",
+    "httpx>=0.25",
+    "streamlit>=1.30",
+    "plotly>=5.18",
+    # GPU-accelerated models
+    "torch>=2.1",
+    "transformers>=4.36",
+    "sentence-transformers>=2.3",
+    "faiss-cpu>=1.7.4",       # faiss-gpu if CUDA available
+    "accelerate>=0.25",
+    "datasets>=2.16",
+    "evaluate>=0.4",
+    "rouge-score>=0.1.2",
+    # Evaluation
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "pandas>=2.1",
+]
+
+# ── Development & testing ──────────────────────────────────────────
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-asyncio>=0.23",
+    "hypothesis>=6.92",       # property-based testing
+    "ruff>=0.1.9",            # linting
+    "mypy>=1.8",              # type checking
+    "pre-commit>=3.6",
+    "ipykernel>=6.27",
+    "jupyter>=1.0",
+]
+
+[project.scripts]
+certirag = "certirag.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["certirag*", "eval*"]
+
+# ── Tool Configuration ─────────────────────────────────────────────
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+select = ["E", "F", "I", "W", "UP", "B", "SIM"]
+ignore = ["E501"]  # we handle line length ourselves
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests (fast, no GPU, no network)",
+    "integration: Integration tests (may need models/data)",
+    "adversarial: Adversarial robustness tests",
+    "slow: Tests that take >30s",
+    "gpu: Tests that require GPU",
+]
+addopts = "-v --tb=short --strict-markers"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # gradual typing

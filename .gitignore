@@ -1,0 +1,53 @@
+# ── Python ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Environment ────────────────────────────────────────────────────
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# ── Data & Model Artifacts ─────────────────────────────────────────
+data/
+outputs/
+models/
+*.faiss
+*.index
+*.pkl
+*.bin
+*.pt
+*.onnx
+*.safetensors
+
+# ── IDE ────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Jupyter ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# ── OS ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Testing & Coverage ────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Docker ─────────────────────────────────────────────────────────
+.dockerignore

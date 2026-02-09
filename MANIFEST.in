@@ -1,0 +1,25 @@
+# Include non-Python files needed in the distribution
+include LICENSE
+include README.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include pyproject.toml
+
+# Include type stub marker
+include certirag/py.typed
+
+# Include config defaults
+recursive-include certirag *.yaml *.yml *.json
+
+# Include UI assets
+recursive-include ui *.py *.css *.html
+
+# Exclude dev/test files from distribution
+prune tests
+prune notebooks
+prune docs
+prune .github
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude .DS_Store
+global-exclude *.egg-info
