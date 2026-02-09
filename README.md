@@ -911,6 +911,47 @@ Assembles all pipeline outputs into a sealed `AuditCertificate`:
 
 ## Evaluation Framework
 
+### Benchmark Results (February 2026)
+
+CertiRAG's DeBERTa-NLI verifier was evaluated on three public NLI/fact-verification benchmarks. Full analysis in **[BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)**.
+
+| Model | Dataset | Binary Acc | Entail F1 | AUROC | Examples |
+|-------|---------|:----------:|:---------:|:-----:|:--------:|
+| **DeBERTa-NLI** | VitaminC | **80.5%** | 79.8% | 0.853 | 200 |
+| **DeBERTa-NLI** | ANLI R1 | **86.5%** | 78.7% | 0.919 | 200 |
+| **DeBERTa-NLI** | FEVER-NLI | **96.7%** | 95.1% | 0.991 | 182 |
+| MiniCheck-lite | VitaminC | 56.0% | 63.0% | 0.652 | 200 |
+
+**Key findings:**
+- **0% contradiction pass-through** on FEVER-NLI — no contradicted claim reaches the user
+- **+24.5 pp** improvement over keyword-heuristic baseline on binary accuracy
+- **AUROC 0.85–0.99** — confidence scores enable fine-grained threshold tuning
+
+### Running Benchmarks
+
+```bash
+# Quick smoke test (~3 min CPU)
+python -m eval.benchmark --dataset vitaminc --max-examples 50
+
+# Full suite (~35 min CPU)
+python -m eval.benchmark --dataset vitaminc --max-examples 200
+python -m eval.benchmark --dataset anli_r1 --max-examples 200
+python -m eval.benchmark --dataset fever_nli --max-examples 200
+
+# Via pytest
+pytest -m benchmark tests/benchmark/
+```
+
+### Plug In Your Own Model
+
+```python
+from eval.benchmark import BenchmarkRunner
+
+runner = BenchmarkRunner(verifier=my_verifier, model_name="MyModel")
+scores = runner.run("vitaminc", max_examples=100)
+print(scores.summary_table())
+```
+
 ### Supported Benchmarks
 
 | Benchmark | Paper | Focus |
