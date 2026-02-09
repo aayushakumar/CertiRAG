@@ -1,0 +1,37 @@
+# CertiRAG configuration: default settings
+# Override with environment variables (CERTIRAG_ prefix) or .env file
+
+mode: "lite"
+
+retrieval:
+  chunk_size: 8
+  overlap_sentences: 2
+  top_k: 5
+  bm25_weight: 0.4
+  dense_weight: 0.6
+  embedding_model: "intfloat/e5-base-v2"
+  reranker_model: "BAAI/bge-reranker-base"
+  use_reranker: true
+
+claim:
+  max_claims: 20
+  max_claim_tokens: 50
+  split_conjunctions: true
+  remove_hedges: true
+  dedup_threshold: 0.8
+
+verification:
+  verifier_model: "lytang/MiniCheck-RoBERTa-large"
+  tau_entail: 0.5
+  tau_contradict: 0.7
+  max_verifier_pairs: 200
+  verifier_batch_size: 16
+  calibration_method: "temperature"
+  use_mse: true
+
+render:
+  default_mode: "strict"
+  include_certificate: true
+
+eval:
+  seed: 42

@@ -1,0 +1,14 @@
+# CertiRAG configuration: strict mode
+# Maximum safety — only show claims with very high confidence
+
+mode: "lite"
+
+verification:
+  tau_entail: 0.7
+  tau_contradict: 0.5
+  max_verifier_pairs: 200
+  use_mse: true
+
+render:
+  default_mode: "strict"
+  include_certificate: true

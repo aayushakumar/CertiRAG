@@ -1,0 +1,14 @@
+# CertiRAG configuration: mixed mode
+# Show all claims but tag unverified ones with warnings
+
+mode: "lite"
+
+verification:
+  tau_entail: 0.5
+  tau_contradict: 0.7
+  max_verifier_pairs: 200
+  use_mse: true
+
+render:
+  default_mode: "mixed"
+  include_certificate: true
