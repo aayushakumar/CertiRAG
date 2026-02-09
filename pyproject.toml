@@ -125,6 +125,8 @@ markers = [
     "unit: Unit tests (fast, no GPU, no network)",
     "integration: Integration tests (may need models/data)",
     "adversarial: Adversarial robustness tests",
+    "benchmark: Benchmark evaluation tests (download datasets, run verifiers)",
+    "smoke: Quick smoke tests (small samples)",
     "slow: Tests that take >30s",
     "gpu: Tests that require GPU",
 ]

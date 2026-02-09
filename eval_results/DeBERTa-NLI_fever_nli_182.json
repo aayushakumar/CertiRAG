@@ -1,0 +1,68 @@
+{
+  "dataset": "fever_nli",
+  "model_name": "DeBERTa-NLI",
+  "n_examples": 182,
+  "accuracy_3class": 0.5549,
+  "accuracy_binary": 0.967,
+  "macro_f1": 0.4886,
+  "binary_entail_f1": 0.9508,
+  "auroc": 0.9906,
+  "ece": 0.4321,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 75,
+      "predicted": 0
+    },
+    {
+      "label": "entailed",
+      "precision": 0.9355,
+      "recall": 0.9667,
+      "f1": 0.9508,
+      "support": 60,
+      "predicted": 62
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.3583,
+      "recall": 0.9149,
+      "f1": 0.515,
+      "support": 47,
+      "predicted": 120
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 0,
+      "entailed": 0,
+      "not_enough_info": 75
+    },
+    "entailed": {
+      "contradicted": 0,
+      "entailed": 58,
+      "not_enough_info": 2
+    },
+    "not_enough_info": {
+      "contradicted": 0,
+      "entailed": 4,
+      "not_enough_info": 43
+    }
+  },
+  "timing": {
+    "total_ms": 835489.3,
+    "avg_ms": 4590.6,
+    "p95_ms": 5075.6
+  },
+  "gold_distribution": {
+    "not_enough_info": 47,
+    "entailed": 60,
+    "contradicted": 75
+  },
+  "pred_distribution": {
+    "not_enough_info": 120,
+    "entailed": 62
+  }
+}

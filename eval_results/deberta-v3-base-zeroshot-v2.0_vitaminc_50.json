@@ -1,0 +1,68 @@
+{
+  "dataset": "vitaminc",
+  "model_name": "deberta-v3-base-zeroshot-v2.0",
+  "n_examples": 50,
+  "accuracy_3class": 0.58,
+  "accuracy_binary": 0.8,
+  "macro_f1": 0.4405,
+  "binary_entail_f1": 0.75,
+  "auroc": 0.8103,
+  "ece": 0.4206,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 11,
+      "predicted": 0
+    },
+    {
+      "label": "entailed",
+      "precision": 0.7895,
+      "recall": 0.7143,
+      "f1": 0.75,
+      "support": 21,
+      "predicted": 19
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.4516,
+      "recall": 0.7778,
+      "f1": 0.5714,
+      "support": 18,
+      "predicted": 31
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 0,
+      "entailed": 0,
+      "not_enough_info": 11
+    },
+    "entailed": {
+      "contradicted": 0,
+      "entailed": 15,
+      "not_enough_info": 6
+    },
+    "not_enough_info": {
+      "contradicted": 0,
+      "entailed": 4,
+      "not_enough_info": 14
+    }
+  },
+  "timing": {
+    "total_ms": 138767.1,
+    "avg_ms": 2775.3,
+    "p95_ms": 2963.9
+  },
+  "gold_distribution": {
+    "not_enough_info": 18,
+    "contradicted": 11,
+    "entailed": 21
+  },
+  "pred_distribution": {
+    "not_enough_info": 31,
+    "entailed": 19
+  }
+}
