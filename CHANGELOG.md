@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-01-XX
+## [0.1.0] - 2026-02-11
 
 ### Added
 
@@ -62,10 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - RAGTruth dataset integration
   - Automated metric computation
 
-- **Testing**: 104 tests across three suites
-  - Unit tests (75) — schemas, renderer, metrics
-  - Integration tests (17) — pipeline flows, corruption
+- **Testing**: 134 tests across four suites
+  - Unit tests (75) — schemas, renderer, metrics, spans
+  - Integration tests (26) — pipeline flows, corruption, e2e verification
   - Adversarial tests (12) — robustness, boundary cases
+  - Benchmark tests (21) — NLI dataset evaluation (slow)
 
 - **Documentation**
   - Comprehensive README with installation guides
