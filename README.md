@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/CertiRAG-v0.1.0-blue?style=for-the-badge" alt="CertiRAG Badge"/>
   <img src="https://img.shields.io/badge/python-3.10%2B-green?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+"/>
   <img src="https://img.shields.io/badge/license-MIT-orange?style=for-the-badge" alt="MIT License"/>
-  <img src="https://img.shields.io/badge/tests-104%20passed-brightgreen?style=for-the-badge&logo=pytest" alt="Tests"/>
+  <img src="https://img.shields.io/badge/tests-134%20passed-brightgreen?style=for-the-badge&logo=pytest" alt="Tests"/>
   <img src="https://img.shields.io/badge/pydantic-v2-purple?style=for-the-badge" alt="Pydantic v2"/>
 </p>
 
@@ -221,7 +221,7 @@ CertiRAG/
 │   ├── ablations.py                 # 10 ablation configurations
 │   └── plots.py                     # Publication-quality matplotlib figures
 │
-├── tests/                           # 104 tests (pytest)
+├── tests/                           # 134 tests (pytest)
 │   ├── conftest.py                  # Shared fixtures & factories
 │   ├── unit/                        # Unit tests
 │   │   ├── test_schemas.py          # Schema construction, validation, roundtrips
