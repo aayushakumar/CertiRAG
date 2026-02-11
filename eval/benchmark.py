@@ -330,7 +330,17 @@ def main():
         help="Number of examples for calibration fitting",
     )
 
+    parser.add_argument(
+        "--seed", type=int, default=42,
+        help="Random seed for reproducibility",
+    )
+
     args = parser.parse_args()
+
+    # ── Reproducibility: fix all seeds before any computation ──────
+    from certirag.utils import set_all_seeds
+    set_all_seeds(args.seed)
+    logger.info(f"Random seed set to {args.seed}")
 
     # Set up logging
     logging.basicConfig(

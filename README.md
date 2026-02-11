@@ -195,15 +195,21 @@ CertiRAG/
 │   │
 │   ├── claim_ir/                    # Claim compilation & normalization
 │   │   ├── compiler.py              # LLM-based claim decomposition
+│   │   ├── gemini_compiler.py       # Gemini-based claim compiler
 │   │   ├── normalizer.py            # Atomicity (split / dehedge / dedup)
 │   │   └── validator.py             # JSON Schema validation for all contracts
 │   │
-│   ├── verify/                      # Verification system
-│   │   ├── verifier.py              # BaseVerifier (ABC)
-│   │   ├── minicheck.py             # MiniCheck-RoBERTa-large (primary)
-│   │   ├── nli_verifier.py          # NLI-DeBERTa-v3 (ablation baseline)
-│   │   ├── llm_judge.py             # LLM-as-judge via OpenAI (ablation)
-│   │   ├── calibrator.py            # Temperature scaling + isotonic regression
+│   ├── verify/                      # Verification system (7 backends)
+│   │   ├── verifier.py              # BaseVerifier ABC + BenchmarkPrediction
+│   │   ├── cascade_verifier.py      # 2-stage gate → resolver pipeline (novel)
+│   │   ├── ensemble_verifier.py     # Weighted NLI ensemble (accurate/sota/large)
+│   │   ├── hf_nli_verifier.py       # DeBERTa NLI (2-class + 3-class)
+│   │   ├── groq_verifier.py         # Groq LLM-as-judge (Llama 3.3 70B)
+│   │   ├── gemini_verifier.py       # Gemini LLM-as-judge
+│   │   ├── minicheck.py             # MiniCheck (RoBERTa-large / word-overlap)
+│   │   ├── nli_verifier.py          # Legacy NLI-DeBERTa wrapper
+│   │   ├── llm_judge.py             # GPT-4o judge (ablation baseline)
+│   │   ├── calibrator.py            # Platt scaling / isotonic calibration
 │   │   └── mse.py                   # Minimal Sufficient Evidence selector
 │   │
 │   └── render/                      # Output rendering
@@ -211,29 +217,29 @@ CertiRAG/
 │       └── certificate.py           # CertificateBuilder (SHA-256 sealing)
 │
 ├── eval/                            # Evaluation harness
-│   ├── datasets/                    # Benchmark data loaders
-│   │   ├── alce.py                  # ALCE (Gao et al., 2023)
-│   │   ├── ragtruth.py              # RAGTruth (Wu et al., 2024)
-│   │   └── aggrefact.py             # AggreFact (Tang et al., 2022)
+│   ├── benchmark.py                 # Pluggable benchmark runner + CLI
+│   ├── scoring.py                   # Metrics: Acc, F1, AUROC, ECE, bootstrap CIs
+│   ├── optimizer.py                 # Threshold grid search + optimization
+│   ├── run_full_eval.py             # Full eval suite (all models × all datasets)
+│   ├── ablations.py                 # 10 ablation configurations (A1–A10)
+│   ├── baselines.py                 # StandardRAG, PosthocChecker, MultiQueryRAG
+│   ├── plots.py                     # Publication-quality matplotlib figures
 │   ├── metrics.py                   # claim_f1, faithfulness, AUROC, ECE, yield
 │   ├── runner.py                    # EvalRunner orchestrator
-│   ├── baselines.py                 # StandardRAG, PosthocChecker, MultiQueryRAG
-│   ├── ablations.py                 # 10 ablation configurations
-│   └── plots.py                     # Publication-quality matplotlib figures
+│   └── datasets/                    # Benchmark data loaders
+│       ├── loaders.py               # VitaminC, ANLI R1-R3, FEVER-NLI loaders
+│       ├── alce.py                  # ALCE (Gao et al., 2023)
+│       ├── ragtruth.py              # RAGTruth (Wu et al., 2024)
+│       └── aggrefact.py             # AggreFact (Tang et al., 2022)
 │
 ├── tests/                           # 134 tests (pytest)
 │   ├── conftest.py                  # Shared fixtures & factories
-│   ├── unit/                        # Unit tests
-│   │   ├── test_schemas.py          # Schema construction, validation, roundtrips
-│   │   ├── test_atomicity.py        # Conjunction splitting, hedge detection, dedup
-│   │   ├── test_renderer.py         # Theorem 1 decisions, display modes, safety
-│   │   ├── test_spans.py            # Span integrity, offset validation
-│   │   └── test_metrics.py          # Evaluation metric correctness
-│   ├── integration/                 # Integration tests
-│   │   ├── test_golden.py           # End-to-end golden path scenarios
-│   │   └── test_corruption.py       # Error handling, edge cases
-│   └── adversarial/                 # Adversarial robustness tests
-│       └── test_adversarial.py      # Negation, entity substitution, spoofing
+│   ├── unit/                        # Schema, atomicity, metrics, renderer, spans
+│   ├── integration/                 # E2E verification, golden paths, corruption
+│   ├── adversarial/                 # Negation, spoofing, entity substitution
+│   └── benchmark/                   # NLI dataset evaluation tests
+│
+├── eval_results/                    # Saved benchmark JSON results (21 files)
 │
 ├── ui/                              # Web interface
 │   └── app.py                       # Streamlit demo application
@@ -242,7 +248,7 @@ CertiRAG/
 │   ├── 01_data_exploration.ipynb    # Chunking, spans, indexing analysis
 │   ├── 02_retrieval_analysis.ipynb  # BM25 vs Dense vs Hybrid comparison
 │   ├── 03_verifier_calibration.ipynb # Calibration, reliability, thresholds
-│   └── 04_publication_plots.ipynb   # Paper tables, LaTeX export
+│   └── 04_publication_plots.ipynb   # Paper-ready tables, LaTeX export
 │
 ├── docs/                            # Documentation
 │   └── architecture.md              # 8 Mermaid architecture diagrams
@@ -252,12 +258,14 @@ CertiRAG/
 │   ├── strict.yaml                  # High-precision (τ_e=0.7, τ_c=0.5)
 │   └── mixed.yaml                   # Mixed display mode
 │
+├── ARCHITECTURE.md                  # System architecture documentation
+├── EVALUATION.md                    # Comprehensive evaluation report (7 models × 5 datasets)
+├── CONTRIBUTING.md                  # Contribution guidelines
+├── CHANGELOG.md                     # Release history
 ├── pyproject.toml                   # Build config, dependencies, tool settings
 ├── Makefile                         # Development command shortcuts
 ├── Dockerfile                       # Multi-stage: CPU (lite) + GPU (full)
 ├── LICENSE                          # MIT License
-├── PLAN.md                          # Implementation roadmap
-├── README_SPEC.md                   # Original research specification
 └── README.md                        # This file
 ```
 
@@ -1118,6 +1126,18 @@ jupyter notebook notebooks/
 5. Submit a pull request
 
 **Code style**: Pydantic v2 models, type hints everywhere, Google-style docstrings, tests for all new functionality.
+
+---
+
+## Limitations
+
+- **Evaluation scale:** Benchmarks use N≈200 examples per dataset; bootstrap 95% CIs are ±4–6pp.
+- **English only:** All verification models and datasets are English-language.
+- **Static evidence:** Evaluations use pre-paired claim-evidence; real-world retrieval noise is not captured.
+- **Verifier accuracy ceiling:** No model achieves 100% — a "verified" badge is not a guarantee of truth.
+- **CPU-only benchmarks:** All published results are from 2-core CPU; GPU may yield different latency profiles.
+
+See [EVALUATION.md](EVALUATION.md) for full limitations and ethical considerations.
 
 ---
 

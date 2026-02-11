@@ -80,7 +80,7 @@ We evaluate **7 verification models** across **5 NLI datasets** (28+ benchmark c
 
 ### Protocol
 
-1. **Dataset sampling:** First N balanced examples from the test split (stratified by label when available)
+1. **Dataset sampling:** First N examples from the test split (sequential order)
 2. **Input format:** NLI-style premise/hypothesis pairs (evidence = premise, claim = hypothesis)
 3. **Label mapping:** All datasets normalized to `{entailed, contradicted, not_enough_info}`
 4. **Evaluation:** Each verifier's `verify_batch()` is called with claim-evidence pairs; predictions compared to gold labels
@@ -724,3 +724,51 @@ All evaluation results are stored in `eval_results/` as JSON files. The complete
 ---
 
 *Generated from 28+ benchmark runs totaling 5,100+ claim-evidence pair evaluations. Bootstrap 95% CIs included for all new results.*
+
+
+---
+
+## Related Work
+
+CertiRAG builds on several lines of research in claim verification and retrieval-augmented generation (RAG) faithfulness:
+
+### Fact Verification Benchmarks
+- **FEVER** (Thorne et al., 2018) — Large-scale fact extraction and verification. Our FEVER-NLI evaluation uses the NLI reformulation by Nie et al. (2020).
+- **VitaminC** (Schuster et al., 2021) — Contrastive fact verification with evidence revision pairs, testing sensitivity to subtle factual changes.
+- **ANLI** (Nie et al., 2020) — Adversarial NLI with human-in-the-loop example collection, providing progressively harder rounds (R1→R3).
+
+### NLI-Based Verification
+- **MiniCheck** (Tang et al., 2024) — Grounding-based fact-checking using synthetic training data. CertiRAG includes MiniCheck as a baseline verifier.
+- **FActScore** (Min et al., 2023) — Fine-grained atomic fact decomposition and verification against Wikipedia. CertiRAG's claim compiler follows a similar decomposition strategy.
+- **SelfCheckGPT** (Manakul et al., 2023) — Consistency-based hallucination detection without external knowledge. Complementary to CertiRAG's evidence-based approach.
+
+### RAG Faithfulness
+- **SAFE** (Wei et al., 2024, Google DeepMind) — Search-Augmented Factuality Evaluator using multi-step reasoning. CertiRAG differs by providing a *fail-closed* policy with formal guarantees (Theorem 1).
+- **FAVA** (Mishra et al., 2024) — Fine-grained hallucination detection and editing for LLM outputs.
+- **ChainPoll** (Friel & Sanchez, 2023) — Multi-sample LLM polling for faithful response verification.
+- **ALCE** (Gao et al., 2023) — Automatic LLM Citation Evaluation benchmark.
+
+### Key Differentiators
+CertiRAG's contributions relative to prior work:
+1. **Fail-closed renderer policy** with formal monotonicity guarantee (Theorem 1) — no prior system provides this.
+2. **Cascade verification** (2-stage gate→resolver) combining fast local NLI with LLM refinement.
+3. **Pluggable verifier architecture** with standardised `BaseVerifier` interface supporting 7 backends.
+4. **Auditable certificates** with SHA-256 sealed provenance chains.
+
+
+---
+
+## Limitations and Ethical Considerations
+
+### Evaluation Limitations
+1. **Sample size:** Each dataset evaluation uses N=200 examples (N=182 for FEVER-NLI due to parsing). This yields bootstrap 95% CIs of ±4–6pp, meaning differences under ~6pp between models may not be statistically significant.
+2. **Sequential sampling:** Examples are taken in dataset order (first N), not stratified by label. Label distributions may not exactly match the full test set distribution.
+3. **CPU-only evaluation:** All benchmarks run on 2-core CPU (GitHub Codespaces). GPU inference may yield different latency profiles and, for non-deterministic operations, slightly different accuracy.
+4. **English only:** All datasets and evaluation are English-language. Performance on other languages is untested.
+5. **Static evidence:** Evaluation uses pre-paired claim-evidence examples. Real-world retrieval noise is not captured in these benchmarks.
+
+### Ethical Considerations
+1. **Over-reliance risk:** Verification badges (✅ / ❌) may create false confidence. Users should understand that verifier accuracy is < 100% — a "verified" claim can still be wrong.
+2. **Automation bias:** Automated verification may discourage human fact-checking. CertiRAG is designed as a *decision support* tool, not a replacement for human judgment.
+3. **Verifier limitations:** All models have systematic failure modes (see Failure Mode Analysis above). Hedge language, implicit claims, and complex multi-hop reasoning remain challenging.
+4. **API dependencies:** Groq and Gemini verifiers rely on third-party APIs with their own usage policies, rate limits, and potential for service changes.

@@ -543,3 +543,77 @@ def bootstrap_confidence_intervals(
         result["auroc"] = _ci(boot_auroc)
 
     return result
+
+
+# ── Paired Statistical Significance Tests ─────────────────────────
+
+
+def mcnemars_test(
+    preds_a: list[BenchmarkPrediction],
+    preds_b: list[BenchmarkPrediction],
+    three_class: bool = True,
+) -> dict[str, float]:
+    """
+    McNemar's test for paired model comparison.
+
+    Tests whether two models make *significantly different* numbers of
+    errors on the same examples.  This is the standard test for paired
+    nominal data (Dietterich, 1998).
+
+    Args:
+        preds_a: Predictions from model A (one per example, same order).
+        preds_b: Predictions from model B (same examples, same order).
+        three_class: If True compare 3-class pred; if False compare
+                     binary (entailed vs not-entailed).
+
+    Returns:
+        Dict with ``chi2``, ``p_value``, ``n_discordant`` (b+c),
+        ``a_only_correct``, ``b_only_correct``.
+
+    Raises:
+        ValueError: If prediction lists differ in length.
+    """
+    if len(preds_a) != len(preds_b):
+        raise ValueError(
+            f"Prediction lists must be equal length "
+            f"({len(preds_a)} vs {len(preds_b)})"
+        )
+
+    a_correct = np.array([
+        (p.pred_label == p.gold_label) if three_class
+        else ((p.pred_label == "entailed") == (p.gold_label == "entailed"))
+        for p in preds_a
+    ])
+    b_correct = np.array([
+        (p.pred_label == p.gold_label) if three_class
+        else ((p.pred_label == "entailed") == (p.gold_label == "entailed"))
+        for p in preds_b
+    ])
+
+    # Discordant cells: b = A correct & B wrong, c = A wrong & B correct
+    b_cell = int(np.sum(a_correct & ~b_correct))   # A-only correct
+    c_cell = int(np.sum(~a_correct & b_correct))    # B-only correct
+    n_disc = b_cell + c_cell
+
+    if n_disc == 0:
+        return {
+            "chi2": 0.0,
+            "p_value": 1.0,
+            "n_discordant": 0,
+            "a_only_correct": b_cell,
+            "b_only_correct": c_cell,
+        }
+
+    # Chi-squared with continuity correction (Edwards, 1948)
+    chi2 = (abs(b_cell - c_cell) - 1) ** 2 / n_disc
+
+    from scipy.stats import chi2 as chi2_dist
+    p_value = float(chi2_dist.sf(chi2, df=1))
+
+    return {
+        "chi2": float(chi2),
+        "p_value": p_value,
+        "n_discordant": n_disc,
+        "a_only_correct": b_cell,
+        "b_only_correct": c_cell,
+    }
