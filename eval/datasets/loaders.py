@@ -46,32 +46,67 @@ def _hf_load_dataset(*args, **kwargs):
     """
     Load a HuggingFace dataset, working around the local eval/datasets/ shadow.
 
-    We temporarily remove conflicting 'datasets' entries from sys.modules
-    so Python finds the real HuggingFace package from site-packages.
+    When running ``python eval/benchmark.py``, Python adds ``eval/`` to
+    sys.path[0], so ``import datasets`` resolves to ``eval/datasets/``
+    instead of the HuggingFace package.  We fix this by:
+      1. Temporarily removing path entries that cause shadowing
+      2. Clearing cached module entries for the shadow
+      3. Importing the real HuggingFace ``datasets`` package
+      4. Restoring everything afterwards
     """
-    # Check if datasets is already the real HF one
+    # Fast path: already have the real HF datasets module
     ds_mod = sys.modules.get("datasets")
     if ds_mod and hasattr(ds_mod, "load_dataset"):
         return ds_mod.load_dataset(*args, **kwargs)
 
-    # Save and remove all 'datasets*' entries that are NOT the HF package
-    saved = {}
+    import importlib
+
+    # Save and remove all 'datasets*' entries from sys.modules
+    saved_modules = {}
     for key in list(sys.modules.keys()):
         if key == "datasets" or key.startswith("datasets."):
-            mod = sys.modules[key]
-            if mod is not None and hasattr(mod, "__file__") and mod.__file__:
-                if "site-packages" not in mod.__file__:
-                    saved[key] = sys.modules.pop(key)
-            elif mod is None:
-                saved[key] = sys.modules.pop(key)
+            saved_modules[key] = sys.modules.pop(key)
+
+    # Remove path entries that cause shadowing (eval/ dir contains datasets/)
+    saved_paths = []
+    for i, p in enumerate(list(sys.path)):
+        import os
+        datasets_dir = os.path.join(p, "datasets")
+        if os.path.isdir(datasets_dir) and os.path.exists(
+            os.path.join(datasets_dir, "__init__.py")
+        ):
+            # Check if this is our local eval/datasets, not the HF one
+            if "site-packages" not in p:
+                saved_paths.append((i, p))
+
+    # Remove shadow paths (reverse order to preserve indices)
+    for _, p in reversed(saved_paths):
+        sys.path.remove(p)
+
+    # Also clear the importlib finder caches
+    importlib.invalidate_caches()
 
     try:
         import datasets as _real_datasets
+
+        if not hasattr(_real_datasets, "load_dataset"):
+            raise ImportError(
+                f"Imported 'datasets' from {getattr(_real_datasets, '__file__', '?')} "
+                "but it doesn't have load_dataset — still shadowed!"
+            )
         result = _real_datasets.load_dataset(*args, **kwargs)
         return result
     finally:
-        # Restore saved modules
-        sys.modules.update(saved)
+        # Restore shadow paths at their original positions
+        for idx, p in saved_paths:
+            if p not in sys.path:
+                sys.path.insert(idx, p)
+        # Keep the real HF datasets in sys.modules (don't restore shadow)
+        # Only restore non-datasets modules that were accidentally removed
+        for key, mod in saved_modules.items():
+            if key not in sys.modules:
+                # Don't restore the shadow — keep the real HF module
+                pass
 
 
 @dataclass

@@ -27,9 +27,19 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
+
+# ── Fix sys.path when running as `python eval/benchmark.py` ────────
+# Python adds the script's directory (eval/) to sys.path[0], which
+# causes `import datasets` to resolve to eval/datasets/ instead of
+# the HuggingFace datasets package.  Replace it with the repo root.
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_repo_root = os.path.dirname(_this_dir)
+if sys.path and os.path.samefile(sys.path[0], _this_dir):
+    sys.path[0] = _repo_root
 
 from eval.datasets.loaders import (
     BenchmarkExample,

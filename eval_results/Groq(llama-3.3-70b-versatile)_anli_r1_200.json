@@ -1,0 +1,69 @@
+{
+  "dataset": "anli_r1",
+  "model_name": "Groq(llama-3.3-70b-versatile)",
+  "n_examples": 200,
+  "accuracy_3class": 0.71,
+  "accuracy_binary": 0.81,
+  "macro_f1": 0.7091,
+  "binary_entail_f1": 0.7164,
+  "auroc": 0.7543,
+  "ece": 0.1852,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.7647,
+      "recall": 0.7647,
+      "f1": 0.7647,
+      "support": 68,
+      "predicted": 68
+    },
+    {
+      "label": "entailed",
+      "precision": 0.6857,
+      "recall": 0.75,
+      "f1": 0.7164,
+      "support": 64,
+      "predicted": 70
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.6774,
+      "recall": 0.6176,
+      "f1": 0.6462,
+      "support": 68,
+      "predicted": 62
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 52,
+      "entailed": 9,
+      "not_enough_info": 7
+    },
+    "entailed": {
+      "contradicted": 3,
+      "entailed": 48,
+      "not_enough_info": 13
+    },
+    "not_enough_info": {
+      "contradicted": 13,
+      "entailed": 13,
+      "not_enough_info": 42
+    }
+  },
+  "timing": {
+    "total_ms": 170453.2,
+    "avg_ms": 852.3,
+    "p95_ms": 969.0
+  },
+  "gold_distribution": {
+    "entailed": 64,
+    "not_enough_info": 68,
+    "contradicted": 68
+  },
+  "pred_distribution": {
+    "contradicted": 68,
+    "entailed": 70,
+    "not_enough_info": 62
+  }
+}

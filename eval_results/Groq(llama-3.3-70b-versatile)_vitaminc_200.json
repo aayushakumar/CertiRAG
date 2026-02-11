@@ -1,0 +1,69 @@
+{
+  "dataset": "vitaminc",
+  "model_name": "Groq(llama-3.3-70b-versatile)",
+  "n_examples": 200,
+  "accuracy_3class": 0.73,
+  "accuracy_binary": 0.845,
+  "macro_f1": 0.6862,
+  "binary_entail_f1": 0.8377,
+  "auroc": 0.6662,
+  "ece": 0.1018,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.6522,
+      "recall": 0.7759,
+      "f1": 0.7087,
+      "support": 58,
+      "predicted": 69
+    },
+    {
+      "label": "entailed",
+      "precision": 0.8333,
+      "recall": 0.8421,
+      "f1": 0.8377,
+      "support": 95,
+      "predicted": 96
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.6,
+      "recall": 0.4468,
+      "f1": 0.5122,
+      "support": 47,
+      "predicted": 35
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 45,
+      "entailed": 6,
+      "not_enough_info": 7
+    },
+    "entailed": {
+      "contradicted": 8,
+      "entailed": 80,
+      "not_enough_info": 7
+    },
+    "not_enough_info": {
+      "contradicted": 16,
+      "entailed": 10,
+      "not_enough_info": 21
+    }
+  },
+  "timing": {
+    "total_ms": 93492.9,
+    "avg_ms": 467.5,
+    "p95_ms": 567.2
+  },
+  "gold_distribution": {
+    "not_enough_info": 47,
+    "contradicted": 58,
+    "entailed": 95
+  },
+  "pred_distribution": {
+    "contradicted": 69,
+    "not_enough_info": 35,
+    "entailed": 96
+  }
+}
