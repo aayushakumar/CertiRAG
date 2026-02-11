@@ -262,13 +262,25 @@ class BenchmarkRunner:
         return predictions
 
     def _save_results(self, scores: BenchmarkScores) -> None:
-        """Save results as JSON."""
+        """Save results as JSON, including bootstrap confidence intervals."""
         self.output_dir.mkdir(parents=True, exist_ok=True)
         filename = f"{scores.model_name}_{scores.dataset}_{scores.n_examples}.json"
         filepath = self.output_dir / filename
 
+        result_dict = scores.to_dict()
+
+        # Compute bootstrap confidence intervals
+        if scores.predictions and len(scores.predictions) >= 20:
+            try:
+                from eval.scoring import bootstrap_confidence_intervals
+                ci = bootstrap_confidence_intervals(scores.predictions)
+                result_dict["confidence_intervals_95"] = ci
+                logger.info("Bootstrap 95%% CIs computed for %s", filename)
+            except Exception as e:
+                logger.warning("Could not compute bootstrap CIs: %s", e)
+
         with open(filepath, "w") as f:
-            json.dump(scores.to_dict(), f, indent=2)
+            json.dump(result_dict, f, indent=2)
 
         logger.info(f"Results saved to {filepath}")
 
@@ -296,6 +308,7 @@ def main():
             "hf_nli", "minicheck_lite", "gemini",
             "groq", "groq_mixtral", "groq_gemma",
             "ensemble_accurate", "ensemble_sota", "ensemble_large",
+            "cascade",
         ],
         default="hf_nli",
         help="Verifier model to use",
@@ -357,6 +370,9 @@ def main():
         from certirag.verify.ensemble_verifier import EnsembleNLIVerifier
         preset = args.model.replace("ensemble_", "")  # accurate | sota | large
         verifier = EnsembleNLIVerifier(preset=preset, device="cpu")
+    elif args.model == "cascade":
+        from certirag.verify.cascade_verifier import CascadeVerifier
+        verifier = CascadeVerifier(device="cpu")
     else:
         print(f"Unknown model: {args.model}")
         return

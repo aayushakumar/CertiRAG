@@ -1,0 +1,101 @@
+{
+  "dataset": "fever_nli",
+  "model_name": "Cascade(gate+resolver)",
+  "n_examples": 182,
+  "accuracy_3class": 0.7802,
+  "accuracy_binary": 0.9231,
+  "macro_f1": 0.7562,
+  "binary_entail_f1": 0.8906,
+  "auroc": 0.9779,
+  "ece": 0.1112,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.8333,
+      "recall": 0.8,
+      "f1": 0.8163,
+      "support": 75,
+      "predicted": 72
+    },
+    {
+      "label": "entailed",
+      "precision": 0.8382,
+      "recall": 0.95,
+      "f1": 0.8906,
+      "support": 60,
+      "predicted": 68
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.5952,
+      "recall": 0.5319,
+      "f1": 0.5618,
+      "support": 47,
+      "predicted": 42
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 60,
+      "entailed": 1,
+      "not_enough_info": 14
+    },
+    "entailed": {
+      "contradicted": 0,
+      "entailed": 57,
+      "not_enough_info": 3
+    },
+    "not_enough_info": {
+      "contradicted": 12,
+      "entailed": 10,
+      "not_enough_info": 25
+    }
+  },
+  "timing": {
+    "total_ms": 1369676.6,
+    "avg_ms": 7525.7,
+    "p95_ms": 8619.9
+  },
+  "gold_distribution": {
+    "not_enough_info": 47,
+    "entailed": 60,
+    "contradicted": 75
+  },
+  "pred_distribution": {
+    "entailed": 68,
+    "not_enough_info": 42,
+    "contradicted": 72
+  },
+  "confidence_intervals_95": {
+    "accuracy_3class": {
+      "mean": 0.7799890109890112,
+      "lower": 0.7196428571428573,
+      "upper": 0.8406593406593407,
+      "std": 0.031031182823907804
+    },
+    "binary_accuracy": {
+      "mean": 0.9239835164835166,
+      "lower": 0.8846153846153846,
+      "upper": 0.9615384615384616,
+      "std": 0.019117227610158626
+    },
+    "macro_f1": {
+      "mean": 0.7549568786093762,
+      "lower": 0.6888652906403063,
+      "upper": 0.8140116549799855,
+      "std": 0.03182031204761489
+    },
+    "entailment_f1": {
+      "mean": 0.8911576142492813,
+      "lower": 0.8347791852105444,
+      "upper": 0.9444767441860465,
+      "std": 0.02816710395766128
+    },
+    "auroc": {
+      "mean": 0.9784918142845704,
+      "lower": 0.954022863177529,
+      "upper": 0.9941932615629983,
+      "std": 0.01027570650593267
+    }
+  }
+}

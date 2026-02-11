@@ -36,6 +36,28 @@ logger = logging.getLogger("certirag.verify.groq_verifier")
 
 JUDGE_PROMPT = """You are an expert fact verification system. Given a CLAIM and EVIDENCE passage, determine whether the evidence supports, contradicts, or is insufficient to verify the claim.
 
+Here are examples of correct classifications:
+
+Example 1:
+CLAIM: "Apple was founded in 1976."
+EVIDENCE: "Apple Inc. was founded on April 1, 1976, by Steve Jobs, Steve Wozniak, and Ronald Wayne."
+Analysis: The evidence directly states Apple was founded in 1976. All parts of the claim are supported.
+Answer: {{"label": "entailed", "score": 0.98, "reasoning": "Evidence explicitly confirms founding year 1976."}}
+
+Example 2:
+CLAIM: "The population of Tokyo is 5 million."
+EVIDENCE: "Tokyo has an estimated population of approximately 14 million people in the city proper."
+Analysis: The evidence says 14 million, but the claim says 5 million. These numbers directly conflict.
+Answer: {{"label": "contradicted", "score": 0.95, "reasoning": "Evidence states 14 million, contradicting the claimed 5 million."}}
+
+Example 3:
+CLAIM: "Einstein won the Nobel Prize for his work on relativity."
+EVIDENCE: "Albert Einstein was a renowned theoretical physicist who developed the theory of relativity."
+Analysis: The evidence confirms Einstein worked on relativity but says nothing about the Nobel Prize.
+Answer: {{"label": "not_enough_info", "score": 0.85, "reasoning": "Evidence discusses relativity but does not mention the Nobel Prize."}}
+
+Now verify this claim:
+
 CLAIM: {claim}
 
 EVIDENCE: {evidence}

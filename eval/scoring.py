@@ -428,3 +428,118 @@ def compare_models(
         ])
 
     return tabulate(rows, headers=headers, tablefmt="grid")
+
+
+# ── Bootstrap Confidence Intervals ────────────────────────────────
+
+
+def bootstrap_confidence_intervals(
+    predictions: list[BenchmarkPrediction],
+    n_bootstrap: int = 1000,
+    confidence: float = 0.95,
+    seed: int = 42,
+) -> dict[str, dict[str, float]]:
+    """
+    Compute bootstrap confidence intervals for key metrics.
+
+    Returns dict mapping metric name → {"mean", "lower", "upper", "std"}.
+    Uses the percentile method with ``n_bootstrap`` resamples.
+
+    Example output::
+
+        {
+            "accuracy_3class": {"mean": 0.735, "lower": 0.680, "upper": 0.785, "std": 0.027},
+            "binary_accuracy": {"mean": 0.845, "lower": 0.800, "upper": 0.885, "std": 0.022},
+            ...
+        }
+    """
+    rng = np.random.RandomState(seed)
+    n = len(predictions)
+
+    if n == 0:
+        return {}
+
+    alpha = 1.0 - confidence
+    lo_pct = 100 * (alpha / 2)
+    hi_pct = 100 * (1 - alpha / 2)
+
+    # Pre-extract arrays for speed
+    gold = np.array([p.gold_label for p in predictions])
+    pred = np.array([p.pred_label for p in predictions])
+    ent_scores = np.array([p.entailment_score for p in predictions])
+
+    # Binary gold: entailed=1, else=0
+    gold_binary = (gold == "entailed").astype(int)
+    pred_binary = (pred == "entailed").astype(int)
+
+    boot_acc3 = []
+    boot_acc_bin = []
+    boot_macro_f1 = []
+    boot_ent_f1 = []
+    boot_auroc = []
+
+    for _ in range(n_bootstrap):
+        idx = rng.randint(0, n, size=n)
+
+        b_gold = gold[idx]
+        b_pred = pred[idx]
+        b_gold_bin = gold_binary[idx]
+        b_pred_bin = pred_binary[idx]
+        b_ent = ent_scores[idx]
+
+        # 3-class accuracy
+        boot_acc3.append(np.mean(b_gold == b_pred))
+
+        # Binary accuracy
+        boot_acc_bin.append(np.mean(b_gold_bin == b_pred_bin))
+
+        # Entailment F1 (binary)
+        tp = np.sum((b_pred_bin == 1) & (b_gold_bin == 1))
+        fp = np.sum((b_pred_bin == 1) & (b_gold_bin == 0))
+        fn = np.sum((b_pred_bin == 0) & (b_gold_bin == 1))
+        prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        rec = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
+        boot_ent_f1.append(f1)
+
+        # Macro F1 (3-class)
+        labels = ["entailed", "contradicted", "not_enough_info"]
+        f1s = []
+        for lbl in labels:
+            tp_l = np.sum((b_pred == lbl) & (b_gold == lbl))
+            fp_l = np.sum((b_pred == lbl) & (b_gold != lbl))
+            fn_l = np.sum((b_pred != lbl) & (b_gold == lbl))
+            p_l = tp_l / (tp_l + fp_l) if (tp_l + fp_l) > 0 else 0.0
+            r_l = tp_l / (tp_l + fn_l) if (tp_l + fn_l) > 0 else 0.0
+            f1_l = 2 * p_l * r_l / (p_l + r_l) if (p_l + r_l) > 0 else 0.0
+            f1s.append(f1_l)
+        boot_macro_f1.append(np.mean(f1s))
+
+        # AUROC (may fail if only one class in resample)
+        if len(np.unique(b_gold_bin)) > 1:
+            try:
+                from sklearn.metrics import roc_auc_score
+                boot_auroc.append(roc_auc_score(b_gold_bin, b_ent))
+            except Exception:
+                pass
+
+    def _ci(values):
+        arr = np.array(values)
+        return {
+            "mean": float(np.mean(arr)),
+            "lower": float(np.percentile(arr, lo_pct)),
+            "upper": float(np.percentile(arr, hi_pct)),
+            "std": float(np.std(arr)),
+        }
+
+    result = {
+        "accuracy_3class": _ci(boot_acc3),
+        "binary_accuracy": _ci(boot_acc_bin),
+        "macro_f1": _ci(boot_macro_f1),
+        "entailment_f1": _ci(boot_ent_f1),
+    }
+
+    if boot_auroc:
+        result["auroc"] = _ci(boot_auroc)
+
+    return result

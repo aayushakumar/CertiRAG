@@ -1,0 +1,101 @@
+{
+  "dataset": "vitaminc",
+  "model_name": "Cascade(gate+resolver)",
+  "n_examples": 200,
+  "accuracy_3class": 0.695,
+  "accuracy_binary": 0.765,
+  "macro_f1": 0.6845,
+  "binary_entail_f1": 0.7487,
+  "auroc": 0.8282,
+  "ece": 0.213,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.8919,
+      "recall": 0.569,
+      "f1": 0.6947,
+      "support": 58,
+      "predicted": 37
+    },
+    {
+      "label": "entailed",
+      "precision": 0.7609,
+      "recall": 0.7368,
+      "f1": 0.7487,
+      "support": 95,
+      "predicted": 92
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.507,
+      "recall": 0.766,
+      "f1": 0.6102,
+      "support": 47,
+      "predicted": 71
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 33,
+      "entailed": 12,
+      "not_enough_info": 13
+    },
+    "entailed": {
+      "contradicted": 3,
+      "entailed": 70,
+      "not_enough_info": 22
+    },
+    "not_enough_info": {
+      "contradicted": 1,
+      "entailed": 10,
+      "not_enough_info": 36
+    }
+  },
+  "timing": {
+    "total_ms": 914398.6,
+    "avg_ms": 4572.0,
+    "p95_ms": 8127.0
+  },
+  "gold_distribution": {
+    "not_enough_info": 47,
+    "contradicted": 58,
+    "entailed": 95
+  },
+  "pred_distribution": {
+    "contradicted": 37,
+    "not_enough_info": 71,
+    "entailed": 92
+  },
+  "confidence_intervals_95": {
+    "accuracy_3class": {
+      "mean": 0.695845,
+      "lower": 0.6348750000000001,
+      "upper": 0.76,
+      "std": 0.03201657344251566
+    },
+    "binary_accuracy": {
+      "mean": 0.765735,
+      "lower": 0.705,
+      "upper": 0.825,
+      "std": 0.030461201141780355
+    },
+    "macro_f1": {
+      "mean": 0.6833091731043209,
+      "lower": 0.6171328622697346,
+      "upper": 0.7466855092589072,
+      "std": 0.03271622420263916
+    },
+    "entailment_f1": {
+      "mean": 0.7487809573524562,
+      "lower": 0.6748429300022175,
+      "upper": 0.8182034632034633,
+      "std": 0.03633725750418284
+    },
+    "auroc": {
+      "mean": 0.8283525184712117,
+      "lower": 0.7695088072231382,
+      "upper": 0.8851912627338322,
+      "std": 0.030000307530354698
+    }
+  }
+}
