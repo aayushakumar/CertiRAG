@@ -1,0 +1,85 @@
+{
+  "total_time_s": 841.2,
+  "models": [
+    "deberta_3class"
+  ],
+  "datasets": [
+    "fever_nli"
+  ],
+  "max_examples": 200,
+  "results": [
+    {
+      "model": "DeBERTa-NLI-3class",
+      "dataset": "fever_nli",
+      "baseline": {
+        "dataset": "fever_nli",
+        "model_name": "Ensemble(accurate)",
+        "n_examples": 182,
+        "accuracy_3class": 0.5824,
+        "accuracy_binary": 0.7308,
+        "macro_f1": 0.5545,
+        "binary_entail_f1": 0.4494,
+        "auroc": 0.802,
+        "ece": 0.2667,
+        "per_class": [
+          {
+            "label": "contradicted",
+            "precision": 0.7895,
+            "recall": 0.8,
+            "f1": 0.7947,
+            "support": 75,
+            "predicted": 76
+          },
+          {
+            "label": "entailed",
+            "precision": 0.6897,
+            "recall": 0.3333,
+            "f1": 0.4494,
+            "support": 60,
+            "predicted": 29
+          },
+          {
+            "label": "not_enough_info",
+            "precision": 0.3377,
+            "recall": 0.5532,
+            "f1": 0.4194,
+            "support": 47,
+            "predicted": 77
+          }
+        ],
+        "confusion_matrix": {
+          "contradicted": {
+            "contradicted": 60,
+            "entailed": 1,
+            "not_enough_info": 14
+          },
+          "entailed": {
+            "contradicted": 3,
+            "entailed": 20,
+            "not_enough_info": 37
+          },
+          "not_enough_info": {
+            "contradicted": 13,
+            "entailed": 8,
+            "not_enough_info": 26
+          }
+        },
+        "timing": {
+          "total_ms": 838111.3,
+          "avg_ms": 4605.0,
+          "p95_ms": 5141.5
+        },
+        "gold_distribution": {
+          "not_enough_info": 47,
+          "entailed": 60,
+          "contradicted": 75
+        },
+        "pred_distribution": {
+          "entailed": 29,
+          "not_enough_info": 77,
+          "contradicted": 76
+        }
+      }
+    }
+  ]
+}

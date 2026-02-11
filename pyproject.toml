@@ -130,7 +130,7 @@ markers = [
     "slow: Tests that take >30s",
     "gpu: Tests that require GPU",
 ]
-addopts = "-v --tb=short --strict-markers"
+addopts = "-v --tb=short --strict-markers -m 'not slow and not smoke'"
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.mypy]

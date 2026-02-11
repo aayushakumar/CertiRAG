@@ -282,7 +282,11 @@ def main():
     )
     parser.add_argument(
         "--model",
-        choices=["hf_nli", "minicheck_lite", "gemini"],
+        choices=[
+            "hf_nli", "minicheck_lite", "gemini",
+            "groq", "groq_mixtral", "groq_gemma",
+            "ensemble_accurate", "ensemble_sota", "ensemble_large",
+        ],
         default="hf_nli",
         help="Verifier model to use",
     )
@@ -293,6 +297,14 @@ def main():
     parser.add_argument(
         "--batch-size", type=int, default=32,
         help="Batch size for verification",
+    )
+    parser.add_argument(
+        "--calibrate", action="store_true",
+        help="Enable isotonic-regression calibration (uses first --cal-size examples)",
+    )
+    parser.add_argument(
+        "--cal-size", type=int, default=50,
+        help="Number of examples for calibration fitting",
     )
 
     args = parser.parse_args()
@@ -317,6 +329,24 @@ def main():
             print("ERROR: Set CERTIRAG_GEMINI_API_KEY environment variable")
             return
         verifier = GeminiVerifier(api_key=api_key)
+    elif args.model.startswith("groq"):
+        from certirag.verify.groq_verifier import GroqVerifier
+        api_key = os.environ.get("GROQ_API_KEY", "")
+        if not api_key:
+            print("ERROR: Set GROQ_API_KEY environment variable")
+            print("Get free key at: https://console.groq.com/")
+            return
+        model_map = {
+            "groq": "llama-3.3-70b",
+            "groq_mixtral": "mixtral-8x7b",
+            "groq_gemma": "gemma2-9b",
+        }
+        groq_model = model_map.get(args.model, "llama-3.3-70b")
+        verifier = GroqVerifier(api_key=api_key, model=groq_model, batch_size=5)
+    elif args.model.startswith("ensemble_"):
+        from certirag.verify.ensemble_verifier import EnsembleNLIVerifier
+        preset = args.model.replace("ensemble_", "")  # accurate | sota | large
+        verifier = EnsembleNLIVerifier(preset=preset, device="cpu")
     else:
         print(f"Unknown model: {args.model}")
         return
@@ -326,6 +356,16 @@ def main():
         batch_size=args.batch_size,
         output_dir=args.output_dir,
     )
+
+    # Optional calibration
+    if args.calibrate and hasattr(verifier, "fit_calibrator"):
+        from eval.datasets.loaders import load_vitaminc
+        print(f"Fitting calibrator on {args.cal_size} VitaminC examples...")
+        cal_examples = load_vitaminc(max_examples=args.cal_size)
+        pairs = [(ex.claim, ex.evidence) for ex in cal_examples]
+        labels = [ex.gold_label for ex in cal_examples]  # string labels: entailed/contradicted/not_enough_info
+        ece = verifier.fit_calibrator(pairs, labels)
+        print(f"Post-calibration ECE: {ece:.4f}")
 
     # Run
     if args.dataset == "all":

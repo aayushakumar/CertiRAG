@@ -1,0 +1,69 @@
+{
+  "dataset": "vitaminc",
+  "model_name": "DeBERTa-NLI-3class+opt",
+  "n_examples": 141,
+  "accuracy_3class": 0.6383,
+  "accuracy_binary": 0.7376,
+  "macro_f1": 0.6297,
+  "binary_entail_f1": 0.6992,
+  "auroc": 0.8131,
+  "ece": 0.2417,
+  "per_class": [
+    {
+      "label": "contradicted",
+      "precision": 0.8333,
+      "recall": 0.4878,
+      "f1": 0.6154,
+      "support": 41,
+      "predicted": 24
+    },
+    {
+      "label": "entailed",
+      "precision": 0.7679,
+      "recall": 0.6418,
+      "f1": 0.6992,
+      "support": 67,
+      "predicted": 56
+    },
+    {
+      "label": "not_enough_info",
+      "precision": 0.4426,
+      "recall": 0.8182,
+      "f1": 0.5745,
+      "support": 33,
+      "predicted": 61
+    }
+  ],
+  "confusion_matrix": {
+    "contradicted": {
+      "contradicted": 20,
+      "entailed": 8,
+      "not_enough_info": 13
+    },
+    "entailed": {
+      "contradicted": 3,
+      "entailed": 43,
+      "not_enough_info": 21
+    },
+    "not_enough_info": {
+      "contradicted": 1,
+      "entailed": 5,
+      "not_enough_info": 27
+    }
+  },
+  "timing": {
+    "total_ms": 265563.1,
+    "avg_ms": 1883.4,
+    "p95_ms": 2710.1
+  },
+  "gold_distribution": {
+    "not_enough_info": 33,
+    "contradicted": 41,
+    "entailed": 67
+  },
+  "pred_distribution": {
+    "not_enough_info": 61,
+    "entailed": 56,
+    "contradicted": 24
+  }
+}

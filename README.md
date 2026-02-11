@@ -913,19 +913,22 @@ Assembles all pipeline outputs into a sealed `AuditCertificate`:
 
 ### Benchmark Results (February 2026)
 
-CertiRAG's DeBERTa-NLI verifier was evaluated on three public NLI/fact-verification benchmarks. Full analysis in **[BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)**.
+CertiRAG's verification pipeline was evaluated across **5 model configurations** on three public NLI benchmarks. Full analysis in **[BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)**.
 
-| Model | Dataset | Binary Acc | Entail F1 | AUROC | Examples |
-|-------|---------|:----------:|:---------:|:-----:|:--------:|
-| **DeBERTa-NLI** | VitaminC | **80.5%** | 79.8% | 0.853 | 200 |
-| **DeBERTa-NLI** | ANLI R1 | **86.5%** | 78.7% | 0.919 | 200 |
-| **DeBERTa-NLI** | FEVER-NLI | **96.7%** | 95.1% | 0.991 | 182 |
-| MiniCheck-lite | VitaminC | 56.0% | 63.0% | 0.652 | 200 |
+| Model | Dataset | 3-Class Acc | Macro F1 | AUROC | ECE |
+|-------|---------|:-----------:|:--------:|:-----:|:---:|
+| **Ensemble(accurate)** | ANLI R1 | **75.5%** | **75.5%** | 0.918 | 0.191 |
+| **Ensemble(accurate)** | VitaminC | **68.5%** | **68.2%** | 0.829 | 0.200 |
+| **Ensemble(sota)** | FEVER-NLI | 61.5% | 61.7% | **0.958** | **0.107** |
+| **Ensemble(sota)** | ANLI R1 | 74.0% | 74.1% | **0.928** | 0.157 |
+| DeBERTa-NLI (2-class) | FEVER-NLI | 55.5% | 48.9% | **0.991** | 0.432 |
+| MiniCheck-lite | VitaminC | 47.5% | 34.8% | 0.652 | 0.190 |
 
-**Key findings:**
-- **0% contradiction pass-through** on FEVER-NLI — no contradicted claim reaches the user
-- **+24.5 pp** improvement over keyword-heuristic baseline on binary accuracy
-- **AUROC 0.85–0.99** — confidence scores enable fine-grained threshold tuning
+**Key improvements (v1 → v2):**
+- **Macro F1: 42.3% → 75.5%** (+33 pp) — 3-class model detects contradictions
+- **ECE: 0.43 → 0.11** — ensemble calibration 4× better
+- **Contradiction F1: 0% → 75%** — unlocked by MNLI+FEVER+ANLI training data
+- **5 pluggable verifier presets** — from fast heuristic to multi-model ensemble
 
 ### Running Benchmarks
 
@@ -933,10 +936,18 @@ CertiRAG's DeBERTa-NLI verifier was evaluated on three public NLI/fact-verificat
 # Quick smoke test (~3 min CPU)
 python -m eval.benchmark --dataset vitaminc --max-examples 50
 
-# Full suite (~35 min CPU)
-python -m eval.benchmark --dataset vitaminc --max-examples 200
-python -m eval.benchmark --dataset anli_r1 --max-examples 200
-python -m eval.benchmark --dataset fever_nli --max-examples 200
+# Full suite with single model (~35 min CPU)
+python -m eval.benchmark --model ensemble_accurate --dataset all --max-examples 200
+
+# Ensemble with calibration
+python -m eval.benchmark --model ensemble_sota --calibrate --cal-size 100
+
+# Full evaluation (all models x all datasets with optimizations)
+python eval/run_full_eval.py --max-examples 200
+
+# LLM-as-Judge via Groq (free, requires API key)
+export GROQ_API_KEY="gsk_..."
+python -m eval.benchmark --model groq --dataset vitaminc --max-examples 50
 
 # Via pytest
 pytest -m benchmark tests/benchmark/

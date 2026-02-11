@@ -35,10 +35,43 @@ Each loader returns ``list[BenchmarkExample]`` with:
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+def _hf_load_dataset(*args, **kwargs):
+    """
+    Load a HuggingFace dataset, working around the local eval/datasets/ shadow.
+
+    We temporarily remove conflicting 'datasets' entries from sys.modules
+    so Python finds the real HuggingFace package from site-packages.
+    """
+    # Check if datasets is already the real HF one
+    ds_mod = sys.modules.get("datasets")
+    if ds_mod and hasattr(ds_mod, "load_dataset"):
+        return ds_mod.load_dataset(*args, **kwargs)
+
+    # Save and remove all 'datasets*' entries that are NOT the HF package
+    saved = {}
+    for key in list(sys.modules.keys()):
+        if key == "datasets" or key.startswith("datasets."):
+            mod = sys.modules[key]
+            if mod is not None and hasattr(mod, "__file__") and mod.__file__:
+                if "site-packages" not in mod.__file__:
+                    saved[key] = sys.modules.pop(key)
+            elif mod is None:
+                saved[key] = sys.modules.pop(key)
+
+    try:
+        import datasets as _real_datasets
+        result = _real_datasets.load_dataset(*args, **kwargs)
+        return result
+    finally:
+        # Restore saved modules
+        sys.modules.update(saved)
 
 
 @dataclass
@@ -90,10 +123,8 @@ def load_vitaminc(
     Returns:
         List of BenchmarkExample.
     """
-    from datasets import load_dataset
-
     slice_spec = f"{split}[:{max_examples}]" if max_examples else split
-    ds = load_dataset("tals/vitaminc", split=slice_spec)
+    ds = _hf_load_dataset("tals/vitaminc", split=slice_spec)
     logger.info(f"Loaded VitaminC {split}: {len(ds)} examples")
 
     examples = []
@@ -138,11 +169,9 @@ def load_anli(
     Returns:
         List of BenchmarkExample.
     """
-    from datasets import load_dataset
-
     split_name = f"{split}_{round}"
     slice_spec = f"{split_name}[:{max_examples}]" if max_examples else split_name
-    ds = load_dataset("facebook/anli", split=slice_spec)
+    ds = _hf_load_dataset("facebook/anli", split=slice_spec)
     logger.info(f"Loaded ANLI {round} {split}: {len(ds)} examples")
 
     examples = []
@@ -182,10 +211,8 @@ def load_fever_nli(
     Returns:
         List of BenchmarkExample.
     """
-    from datasets import load_dataset
-
     slice_spec = f"{split}[:{max_examples}]" if max_examples else split
-    ds = load_dataset("pietrolesci/nli_fever", split=slice_spec)
+    ds = _hf_load_dataset("pietrolesci/nli_fever", split=slice_spec)
     logger.info(f"Loaded FEVER-NLI {split}: {len(ds)} examples")
 
     examples = []

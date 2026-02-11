@@ -62,9 +62,10 @@ def hf_nli_verifier():
     """Load the HF NLI verifier once for the module."""
     try:
         from certirag.verify.hf_nli_verifier import HFNLIVerifier
-        return HFNLIVerifier(device="cpu", batch_size=32)
-    except ImportError:
-        pytest.skip("torch/transformers not installed")
+        verifier = HFNLIVerifier(device="cpu", batch_size=32)
+        return verifier
+    except (ImportError, OSError) as e:
+        pytest.skip(f"Model not available: {e}")
 
 
 @pytest.fixture(scope="module")
